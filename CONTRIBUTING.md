@@ -6,11 +6,27 @@ Mublo Framework에 기여해 주셔서 감사합니다.
 
 1. 저장소를 포크합니다
 2. 로컬에 클론합니다
-3. 브랜치를 생성합니다
+3. `develop` 브랜치에서 작업 브랜치를 생성합니다
 
 ```bash
+git checkout develop
+git pull origin develop
 git checkout -b feature/my-feature
 ```
+
+## 브랜치 전략
+
+Git Flow의 경량 버전을 따릅니다.
+
+- **`main`** — 릴리스된 안정 버전. 직접 푸시 금지. 메인테이너만 머지 가능
+- **`develop`** — 다음 릴리스를 위한 통합 브랜치. 모든 작업의 베이스
+- **`feature/<name>`** — 새 기능. `develop`에서 분기, `develop`으로 PR
+- **`fix/<name>`** — 버그 수정. `develop`에서 분기, `develop`으로 PR
+- **`hotfix/<name>`** — 릴리스 후 긴급 패치. `main`에서 분기, `main`으로 PR (메인테이너 전용)
+
+릴리스 시점에 메인테이너가 `develop` → `main` PR을 만들고 머지 후 버전 태그(`v1.0.1`)를 부여합니다.
+
+> ⚠️ **외부 컨트리뷰터는 `main`이 아닌 `develop`을 베이스로 PR을 보내 주세요.** `main`으로 들어온 PR은 base 브랜치 변경을 요청드립니다. `main`으로의 머지는 메인테이너 권한으로 제한되어 있습니다.
 
 ## 개발 환경
 
@@ -48,12 +64,14 @@ test: MemberService 단위 테스트 추가
 
 ## Pull Request
 
-1. `main` 브랜치에서 최신 코드를 가져옵니다
-2. 기능 브랜치에서 작업합니다
+1. `develop` 브랜치에서 최신 코드를 가져옵니다
+2. `feature/` 또는 `fix/` 브랜치에서 작업합니다
 3. 테스트를 통과시킵니다 (`composer test`)
-4. PR을 생성합니다
+4. **base 브랜치를 `develop`으로 지정**하여 PR을 생성합니다
 
 저장소에 [PR 템플릿](.github/pull_request_template.md)이 준비되어 있습니다. PR 생성 시 자동으로 표시됩니다.
+
+머지는 **squash merge**만 허용되며, 머지 후 작업 브랜치는 자동으로 삭제됩니다. 머지 커밋의 제목은 PR 제목, 본문은 PR 본문이 사용되므로 PR 작성 시 둘 다 신경 써 주세요.
 
 ### PR 체크리스트
 
