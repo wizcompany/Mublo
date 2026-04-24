@@ -2,6 +2,7 @@
 namespace Mublo\Core\Extension;
 
 use Mublo\Infrastructure\Database\Database;
+use Mublo\Infrastructure\Database\SqlStatementSplitter;
 
 /**
  * MigrationRunner
@@ -28,11 +29,13 @@ use Mublo\Infrastructure\Database\Database;
 class MigrationRunner
 {
     private Database $db;
+    private SqlStatementSplitter $splitter;
     private string $trackingTable = 'schema_migrations';
 
-    public function __construct(Database $db)
+    public function __construct(Database $db, ?SqlStatementSplitter $splitter = null)
     {
         $this->db = $db;
+        $this->splitter = $splitter ?? new SqlStatementSplitter();
     }
 
     /**
@@ -95,14 +98,8 @@ class MigrationRunner
                 // @optional-table 주석 파싱: 해당 테이블 부재 시 관련 쿼리 에러를 무시
                 $optionalTables = $this->parseOptionalTables($sql);
 
-                $queries = array_filter(
-                    array_map(function ($q) {
-                        $lines = explode("\n", $q);
-                        $lines = array_filter($lines, fn($line) => !str_starts_with(trim($line), '--'));
-                        return trim(implode("\n", $lines));
-                    }, explode(';', $sql)),
-                    fn($q) => !empty($q)
-                );
+                // 문자열 리터럴·주석 안의 ; 를 올바르게 보존하면서 문(statement) 분할
+                $queries = $this->splitter->split($sql);
 
                 foreach ($queries as $query) {
                     try {

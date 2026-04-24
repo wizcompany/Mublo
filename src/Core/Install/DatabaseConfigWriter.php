@@ -6,6 +6,7 @@ use PDO;
 use PDOException;
 use Exception;
 use Mublo\Infrastructure\Crypto\CryptoManager;
+use Mublo\Infrastructure\Database\SqlStatementSplitter;
 
 /**
  * DatabaseConfigWriter
@@ -188,10 +189,8 @@ PHP;
      */
     private function executeSqlViaMysqli(\mysqli $mysqli, string $sql): void
     {
-        $queries = array_filter(
-            array_map('trim', explode(';', $sql)),
-            fn($q) => !empty($q)
-        );
+        // 문자열·주석 안의 ; 를 안전하게 보존하며 문 분할
+        $queries = (new SqlStatementSplitter())->split($sql);
 
         foreach ($queries as $query) {
             try {
